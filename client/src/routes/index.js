@@ -30,7 +30,7 @@ const router=createBrowserRouter([
                 element:<Authlayout> <Checkemail/></Authlayout>
             },
             {
-                path:"register",
+                path:"password",
                 element:<Authlayout> <Checkpassword/></Authlayout>
             }
         ]

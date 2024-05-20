@@ -2,6 +2,10 @@ import React from 'react'
 import { useState } from 'react'
 import { IoIosClose } from "react-icons/io";
 import { Link } from 'react-router-dom';
+import uploadfile from '../helpers/uploadfile';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 const Register = () => {
   const [data,setData]=useState({
     name:"",
@@ -9,7 +13,7 @@ const Register = () => {
     password:"",
     profilepic:""
   })
-
+  const navigate=useNavigate();
   const [uploadphoto,setUploadphoto]=useState("");
 
   const handleonchange=(e)=>{
@@ -21,12 +25,20 @@ const Register = () => {
     })
   }
 
-  const handlephoto=(e)=>{
+  const handlephoto=async (e)=>{
         const data=e;
 
-        const uploadedfile=e.target.files[0];
+        const file=e.target.files[0];
+        const uploadin=await uploadfile(file);
+        console.log(uploadin);
+        setUploadphoto(file);
 
-        setUploadphoto(uploadedfile);
+        setData((prevdata)=>{
+          return {
+            ...prevdata,
+            "profilepic":uploadin?.url
+          }
+        })
   }
 
   const handlecancelphoto=(e)=>{
@@ -36,10 +48,34 @@ const Register = () => {
     e.preventDefault();
     setUploadphoto(null);
   }
-  const handlesubmit=(e)=>{
+  const handlesubmit=async (e)=>{
     e.preventDefault();
     e.stopPropagation();
     console.log(data);
+    console.log(process.env.REACT_APP_BACKEND_URL)
+    const url=`${process.env.REACT_APP_BACKEND_URL}/api/register`;
+
+    try {
+      
+      const response=await axios.post(url,data);
+      console.log(response);
+      toast.success(response?.data.message);
+
+      if(response.data.success){
+        setData({
+          name:"",
+          email:"",
+          password:"",
+          profilepic:""
+        })
+        navigate('/email');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message)
+      console.log("error",error)
+    }
+
+    
   }
   return (
     <div className='mt-5'>
