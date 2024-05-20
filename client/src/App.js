@@ -1,9 +1,10 @@
-import logo from './logo.svg';
-import './App.css';
-
+import { Outlet } from 'react-router-dom';
+import './index.css'
 function App() {
   return (
-     <div>shjbjjvk</div>
+     <div  >
+      <Outlet/>
+     </div>
   );
 }
 
