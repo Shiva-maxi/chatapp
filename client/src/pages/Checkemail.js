@@ -1,11 +1,11 @@
 import React from 'react'
 import { useState } from 'react'
-import { IoIosClose } from "react-icons/io";
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { FaRegCircleUser } from "react-icons/fa6";
+import { PiUserCircle } from 'react-icons/pi';
 const Checkemail = () => {
   const [data,setData]=useState({
     email:"",
@@ -27,21 +27,24 @@ const Checkemail = () => {
   const handlesubmit=async (e)=>{
     e.preventDefault();
     e.stopPropagation();
-    console.log(data);
-    console.log(process.env.REACT_APP_BACKEND_URL)
+    // console.log(process.env.REACT_APP_BACKEND_URL)
     const url=`${process.env.REACT_APP_BACKEND_URL}/api/email`;
 
     try {
       
       const response=await axios.post(url,data);
-      console.log(response);
+      // console.log(response);
       toast.success(response?.data.message);
 
       if(response.data.success){
         setData({
           email:"",
         })
-        navigate('/password');
+        navigate('/password',{
+          state:{
+            userdata:response?.data?.data
+          }
+        });
       }
     } catch (error) {
       toast.error(error.response?.data?.message)
@@ -52,9 +55,9 @@ const Checkemail = () => {
   }
   return (
     <div className='mt-5'>
-      <div className='bg-white  max-w-sm mx-3  p-4  rounded mx-auto'>
+      <div className='bg-white  max-w-sm   p-4  rounded mx-auto'>
         <div className='flex justify-center items-center' >
-        <FaRegCircleUser size={50}/>
+        <PiUserCircle size={50}/>
         </div>
         
         <h3 className='mt-3'>Welcome to Chat App</h3>
