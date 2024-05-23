@@ -7,13 +7,15 @@ import { Link } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import Avatar from '../components/Avatar';
 import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { setToken, setUser } from '../redux/user';
 const Checkpassword = () => {
   const [data,setData]=useState({
     password:"",
   })
   const navigate=useNavigate();
   const location=useLocation();
-
+  const dispatch=useDispatch();
   const handleonchange=(e)=>{
     const {name,value}=e.target;
     setData((prevdata)=>{
@@ -33,8 +35,8 @@ const Checkpassword = () => {
   const handlesubmit=async (e)=>{
     e.preventDefault();
     e.stopPropagation();
-    console.log(data);
-    console.log(process.env.REACT_APP_BACKEND_URL)
+    // console.log(data);
+    // console.log(process.env.REACT_APP_BACKEND_URL)
     const url=`${process.env.REACT_APP_BACKEND_URL}/api/password`;
 
     try {
@@ -52,6 +54,8 @@ const Checkpassword = () => {
       toast.success(response?.data.message);
 
       if(response.data.success){
+        dispatch(setToken(response?.data?.token));
+        localStorage.setItem('token',response?.data?.token);
         setData({
           password:"",
         })
