@@ -5,6 +5,7 @@ const checkPassword = require("../controller/checkPassword");
 const userDetails = require("../controller/userDetails");
 const logout = require("../controller/logout");
 const updateuserdetails = require("../controller/updateUserdetails");
+const Searchuser = require("../controller/searchUser");
 const router=express.Router();
 // api for registering a user
 router.post('/register',registerUser);
@@ -16,6 +17,8 @@ router.post('/password',checkPassword);
 router.get('/userdetails',userDetails)
 //api for logout
 router.get('/logout',logout)
-
+//api for updating user details
 router.post('/updateuserdetails',updateuserdetails)
+//api for searching an user in db
+router.post('/searchuser',Searchuser)
 module.exports=router;
