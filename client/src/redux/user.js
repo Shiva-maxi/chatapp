@@ -8,7 +8,8 @@ const userSlice=createSlice({
         name:"",
         email:"",
         profilepicurl:"",
-        token:""
+        token:"",
+        onlineUser:[]
     },
 
     reducers:{
@@ -27,11 +28,14 @@ const userSlice=createSlice({
         },
         setToken:(state,action)=>{
             state.token=action.payload
+        },
+        setOnlineuser:(state,action)=>{
+            state.onlineUser=action.payload
         }
     }
 })
 
 
-export const {setUser,logout,setToken}=userSlice.actions;
+export const {setUser,logout,setToken,setOnlineuser}=userSlice.actions;
 
 export default userSlice.reducer;

@@ -34,8 +34,8 @@ const Searchuser = ({ onclose }) => {
   }, [search]);
 
   return (
-    <div className="fixed top-0 bottom-0 right-0 left-0 bg-slate-700 opacity-40">
-      <div className="w-full max-w-lg mx-auto mt-10">
+    <div className="fixed top-0 bottom-0 right-0 left-0 bg-slate-700  opacity-60 overflow-y-scroll">
+      <div className="w-full max-w-lg mx-auto mt-10 ">
         <div className="bg-white h-16 rounded overflow-hidden flex">
           <input
             type="text"
@@ -48,7 +48,7 @@ const Searchuser = ({ onclose }) => {
             <IoSearchOutline size={25} />
           </div>
         </div>
-        <div className="bg-white mt-2 w-full p-4 rounded">
+        <div className="bg-white mt-2 w-full p-4 rounded ">
           {searchusers.length === 0 && !loading && (
             <p className="text-center text-slate-500">no user found!</p>
           )}
@@ -58,7 +58,9 @@ const Searchuser = ({ onclose }) => {
               <Loading />
             </p>
           )}
-
+          {/* {searchusers.length!=0 && (
+            console.log(searchusers)
+          )} */}
           {searchusers.length !== 0 &&
             !loading &&
             searchusers.map((user, index) => {
