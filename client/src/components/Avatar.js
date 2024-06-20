@@ -2,7 +2,7 @@ import React from "react";
 import { PiUserCircle } from "react-icons/pi";
 import { useSelector } from "react-redux";
 const Avatar = ({ userId, name, profilepicurl, width, height }) => {
-  const onlineuser = useSelector((state) => state?.user?.onlineUser);
+   const onlineuser=useSelector(state=>state?.user?.onlineUser)
   let avatarname = "";
 
   if (name) {

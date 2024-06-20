@@ -119,12 +119,12 @@ const Siderbar = () => {
             title={user?.name}
             onClick={() => setEdituserdetailsopen(true)}
           >
-            <Avatar
-              width={40}
-              height={40}
-              name={user?.name}
-              imageUrl={user?.profilepic}
-              userId={user?._id}
+             <Avatar
+            width={50}
+            height={50}
+            name={user?.name}
+            profilepicurl={user?.profile_pic}
+            userId={user?._id}
             />
           </button>
           <button

@@ -6,34 +6,101 @@ const http = require("http");
 
 const server = http.createServer(app);
 
-const getUserDetailsFromToken =require("../helpers/getUserDetailsfromtoken");
+const getUserDetailsFromToken = require("../helpers/getUserDetailsfromtoken");
+const UserModel = require("../models/UserModel");
 
-const io =new  Server(server, {
+const {MessageModel,ConversationModel}=require('../models/ConversationModel');
+
+const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL,
     credentials: true,
   },
 });
 
-const onlineusers=new Set();
+const onlineusers = new Set();
 
-io.on('connection',async (socket)=>{
-    console.log('a user connected',socket.id)
-    const token=socket.handshake.auth.token;//gets the token from frontend after making connection
-    const user=await getUserDetailsFromToken(token);
+io.on("connection", async (socket) => {
+  console.log("connect User ", socket.id);
 
-    socket.join(user?._id);//the client joins a room named after its id
+  const token = socket.handshake.auth.token;
+  console.log("iehbs");
+  //current user details
+  const user = await getUserDetailsFromToken(token);
 
-    onlineusers.add(user?._id);//adds the user to online users list;
+  //create a room
+  socket.join(user?._id.toString());
+  onlineusers.add(user?._id?.toString());
 
-    io.emit('onlineuser',Array.from(onlineusers));//emits the online users to all clients
-    socket.on('disconnect',()=>{
-        onlineusers.delete(user?._id)
-        console.log('user diconnected',socket.id);
+  io.emit("onlineuser", Array.from(onlineusers));
+
+  socket.on("message-page", async (userId) => {
+    console.log("userId", userId);
+    const userDetails = await UserModel.findById(userId).select("-password");
+
+    const payload = {
+      _id: userDetails?._id,
+      name: userDetails?.name,
+      email: userDetails?.email,
+      profile_pic: userDetails?.profilepic,
+      online: onlineusers.has(userId),
+    };
+    socket.emit("message-user", payload);
+  });
+  //new message  from client to push to server
+
+  socket.on("new message", async (data) => {
+
+    const Conversation=await ConversationModel.findOne({
+      "$or":
+          [{sender:data?.sender,receiver:data?.receiver},
+            {sender:data?.receiver,receiver:data?.sender}
+          ]
+      
     })
-})
+    // if no Conversation create it
+    if(!Conversation){
+        const createconversation=await  ConversationModel({
+          sender:data?.sender,
+          receiver:data?.receiver
+        })
 
+        const save=await createconversation.save();
+    }
 
-module.exports={
-    app,server
-}
+    const message=new  MessageModel({
+          text:data?.text,
+          imageurl:data?.imageurl,
+          videourl:data?.videourl,
+          msgbyuserid:data?.msgbyuserid
+    })
+
+    const savemessage=await message.save();
+
+    const updateconversation=await ConversationModel.updateOne(
+      {_id:Conversation._id},{
+        "$push":{messages:savemessage?._id}
+      }
+    )
+    const getConversationMessage = await ConversationModel.findOne({
+      "$or" : [
+          { sender : data?.sender, receiver : data?.receiver },
+          { sender : data?.receiver, receiver :  data?.sender}
+      ]
+  }).populate('messages').sort({updatedAt:-1});
+
+  io.to(data?.sender).emit('message',getConversationMessage.messages || []);
+  io.to(data?.receiver).emit('message',getConversationMessage.messages || [])
+    console.log("new smessage", data);
+  });
+
+  socket.on("disconnect", () => {
+    onlineusers.delete(user?._id);
+    console.log("user diconnected", socket.id);
+  });
+});
+
+module.exports = {
+  app,
+  server,
+};

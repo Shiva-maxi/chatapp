@@ -7,6 +7,7 @@ import { logout, setUser } from "../redux/user";
 import Siderbar from "../components/Siderbar";
 import io from "socket.io-client";
 import { setOnlineuser } from "../redux/user";
+import { setSocketconnection } from "../redux/user";
 const Home = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -46,6 +47,8 @@ const Home = () => {
       console.log(data);
       dispatch(setOnlineuser(data));
     })
+
+    dispatch(setSocketconnection(socketconnection))
 
 
     return ()=>{
