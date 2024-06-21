@@ -178,15 +178,15 @@ const Messagepage = () => {
                     : "bg-white"
                 }`}
               >
-                <div>
+                <div className="w-full">
                   {message.imageurl && (
                     <img src={message?.imageurl}
                     className='w-full h-full object-scale-down'></img>
                   )}
                   {message.videourl && (
-                    <img src={message?.videourl}
+                    <video src={message?.videourl}
                     className='w-full h-full object-scale-down'
-                    controls></img>
+                    controls></video>
                   )}
                   <p className="px-2">{message.text}</p>
                 </div>

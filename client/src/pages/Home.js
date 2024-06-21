@@ -34,7 +34,7 @@ const Home = () => {
 
   useEffect(() => {
     userdetails();
-  }, []);
+  },[]);
 
   useEffect(() => {
     const socketconnection = io(process.env.REACT_APP_BACKEND_URL, {
@@ -54,7 +54,7 @@ const Home = () => {
     return ()=>{
       socketconnection.disconnect();
     }
-  });
+  },[]);
   const basePath = location.pathname === "/";
   return (
     <div className="grid lg:grid-cols-[300px,1fr] h-screen max-h-screen">

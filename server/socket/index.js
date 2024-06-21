@@ -8,8 +8,11 @@ const server = http.createServer(app);
 
 const getUserDetailsFromToken = require("../helpers/getUserDetailsfromtoken");
 const UserModel = require("../models/UserModel");
-
-const {MessageModel,ConversationModel}=require('../models/ConversationModel');
+const getConversation=require('../helpers/getConversation')
+const {
+  MessageModel,
+  ConversationModel,
+} = require("../models/ConversationModel");
 
 const io = new Server(server, {
   cors: {
@@ -46,56 +49,85 @@ io.on("connection", async (socket) => {
       online: onlineusers.has(userId),
     };
     socket.emit("message-user", payload);
+
+    const getConversationMessage = await ConversationModel.findOne({
+      $or: [
+        { sender: user?._id, receiver: userId },
+        { sender: userId, receiver: user?._id },
+      ],
+    })
+      .populate("messages")
+      .sort({ updatedAt: -1 });
+
+      socket.emit('message',getConversationMessage?.messages || [])
+
   });
   //new message  from client to push to server
 
   socket.on("new message", async (data) => {
-
-    const Conversation=await ConversationModel.findOne({
-      "$or":
-          [{sender:data?.sender,receiver:data?.receiver},
-            {sender:data?.receiver,receiver:data?.sender}
-          ]
-      
-    })
+    const Conversation = await ConversationModel.findOne({
+      $or: [
+        { sender: data?.sender, receiver: data?.receiver },
+        { sender: data?.receiver, receiver: data?.sender },
+      ],
+    });
     // if no Conversation create it
-    if(!Conversation){
-        const createconversation=await  ConversationModel({
-          sender:data?.sender,
-          receiver:data?.receiver
-        })
+    if (!Conversation) {
+      const createconversation = await ConversationModel({
+        sender: data?.sender,
+        receiver: data?.receiver,
+      });
 
-        const save=await createconversation.save();
+      const save = await createconversation.save();
     }
 
-    const message=new  MessageModel({
-          text:data?.text,
-          imageurl:data?.imageurl,
-          videourl:data?.videourl,
-          msgbyuserid:data?.msgbyuserid
-    })
+    const message = new MessageModel({
+      text: data?.text,
+      imageurl: data?.imageurl,
+      videourl: data?.videourl,
+      msgbyuserid: data?.msgbyuserid,
+    });
 
-    const savemessage=await message.save();
+    const savemessage = await message.save();
 
-    const updateconversation=await ConversationModel.updateOne(
-      {_id:Conversation._id},{
-        "$push":{messages:savemessage?._id}
+    const updateconversation = await ConversationModel.updateOne(
+      { _id: Conversation?._id },
+      {
+        $push: { messages: savemessage?._id },
       }
-    )
+    );
     const getConversationMessage = await ConversationModel.findOne({
-      "$or" : [
-          { sender : data?.sender, receiver : data?.receiver },
-          { sender : data?.receiver, receiver :  data?.sender}
-      ]
-  }).populate('messages').sort({updatedAt:-1});
+      $or: [
+        { sender: data?.sender, receiver: data?.receiver },
+        { sender: data?.receiver, receiver: data?.sender },
+      ],
+    })
+      .populate("messages")
+      .sort({ updatedAt: -1 });
 
-  io.to(data?.sender).emit('message',getConversationMessage.messages || []);
-  io.to(data?.receiver).emit('message',getConversationMessage.messages || [])
+    io.to(data?.sender).emit("message", getConversationMessage?.messages || []);
+    io.to(data?.receiver).emit(
+      "message",
+      getConversationMessage?.messages || []
+    );
+    const conversationSender = await getConversation(data?.sender)
+    const conversationReceiver = await getConversation(data?.receiver)
+
+    io.to(data?.sender).emit('conversation',conversationSender)
+    io.to(data?.receiver).emit('conversation',conversationReceiver)
     console.log("new smessage", data);
   });
 
+  socket.on('sidebar',async (data)=>{
+    console.log('current user',data)
+
+
+    const conversation=await getConversation(data)//data->>userid 
+    socket.emit('conversation',conversation)
+  })
+
   socket.on("disconnect", () => {
-    onlineusers.delete(user?._id);
+    onlineusers.delete(user?._id.toString());
     console.log("user diconnected", socket.id);
   });
 });
