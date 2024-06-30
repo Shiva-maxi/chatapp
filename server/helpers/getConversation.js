@@ -11,9 +11,16 @@ const getConversation=async(userid)=>{
     
     
         const conversation=currrentuserconversation.map((conv,ind)=>{
-            const countunseenmessage=conv.messages.reduce((prev,curr)=>{
-                return prev+(conv.seen)?0:1;
-            },0);
+            const countunseenmessage = conv?.messages?.reduce((preve,curr) => {
+                const msgbyuserId = curr?.msgbyuserid?.toString()
+
+                if(msgbyuserId !==  userid){
+                    return  preve + (curr?.seen ? 0 : 1)
+                }else{
+                    return preve
+                }
+             
+            },0)
     
             return{
                 _id : conv?._id,

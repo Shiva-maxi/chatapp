@@ -126,6 +126,31 @@ io.on("connection", async (socket) => {
     socket.emit('conversation',conversation)
   })
 
+
+  socket.on('seen',async(msgbyuserid)=>{
+        
+    let conversation = await ConversationModel.findOne({
+        "$or" : [
+            { sender : user?._id, receiver : msgbyuserid },
+            { sender : msgbyuserid, receiver :  user?._id}
+        ]
+    })
+
+    const conversationMessageId = conversation?.messages || []//contains all the message id's
+
+    const updateMessages  = await MessageModel.updateMany(
+        { _id : { "$in" : conversationMessageId }, msgbyuserid : msgbyuserid },
+        { "$set" : { seen : true }}
+    )
+
+    //send conversation
+    const conversationSender = await getConversation(user?._id?.toString())
+    const conversationReceiver = await getConversation(msgbyuserid)
+
+    io.to(user?._id?.toString()).emit('conversation',conversationSender)
+    io.to(msgbyuserid).emit('conversation',conversationReceiver)
+})
+
   socket.on("disconnect", () => {
     onlineusers.delete(user?._id.toString());
     console.log("user diconnected", socket.id);

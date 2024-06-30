@@ -121,6 +121,7 @@ const Messagepage = () => {
   useEffect(() => {
     if (socketconnection) {
       socketconnection.emit("message-page", params.userid);
+      socketconnection.emit('seen',params.userid);
 
       socketconnection.on("message-user", (data) => {
         console.log("data", data);

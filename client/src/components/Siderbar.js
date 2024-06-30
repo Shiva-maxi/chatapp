@@ -241,7 +241,7 @@ const Siderbar = () => {
                         </div>
                       )}
                     </div>
-                    <p className="text-ellipsis line-clamp-1">
+                    <p className=" ">
                       {conv?.lastMsg?.text}
                     </p>
                   </div>
